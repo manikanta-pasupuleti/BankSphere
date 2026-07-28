@@ -1,0 +1,259 @@
+{
+  "info": {
+    "name": "Online Banking System API",
+    "description": "Complete API collection for Online Banking System",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5000/health"
+      }
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "http://localhost:5000/api/users",
+            "body": {
+              "raw": "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"email\":\"john@example.com\",\"phone\":\"+1234567890\",\"address\":\"123 Main St\",\"city\":\"New York\",\"state\":\"NY\",\"postalCode\":\"10001\",\"country\":\"USA\"}"
+            }
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/users"
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/users/{{userId}}"
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "http://localhost:5000/api/users/{{userId}}",
+            "body": {
+              "raw": "{\"firstName\":\"Jane\",\"lastName\":\"Doe\",\"email\":\"jane@example.com\"}"
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:5000/api/users/{{userId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Accounts",
+      "item": [
+        {
+          "name": "Create Account",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "http://localhost:5000/api/accounts",
+            "body": {
+              "raw": "{\"userId\":\"{{userId}}\",\"accountNumber\":\"ACC1234567890\",\"accountType\":\"SAVINGS\",\"currency\":\"USD\"}"
+            }
+          }
+        },
+        {
+          "name": "Get All Accounts",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/accounts"
+          }
+        },
+        {
+          "name": "Get Account by ID",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/accounts/{{accountId}}"
+          }
+        },
+        {
+          "name": "Get Accounts by User",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/accounts/user/{{userId}}"
+          }
+        },
+        {
+          "name": "Get Account Balance",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/accounts/{{accountId}}/balance"
+          }
+        },
+        {
+          "name": "Update Account",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "http://localhost:5000/api/accounts/{{accountId}}",
+            "body": {
+              "raw": "{\"accountType\":\"CHECKING\",\"status\":\"ACTIVE\"}"
+            }
+          }
+        },
+        {
+          "name": "Delete Account",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:5000/api/accounts/{{accountId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Create Transaction (Deposit)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "http://localhost:5000/api/transactions",
+            "body": {
+              "raw": "{\"accountId\":\"{{accountId}}\",\"transactionType\":\"DEPOSIT\",\"amount\":\"1000.00\",\"description\":\"Test deposit\"}"
+            }
+          }
+        },
+        {
+          "name": "Create Transaction (Withdrawal)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "http://localhost:5000/api/transactions",
+            "body": {
+              "raw": "{\"accountId\":\"{{accountId}}\",\"transactionType\":\"WITHDRAWAL\",\"amount\":\"100.00\",\"description\":\"Test withdrawal\"}"
+            }
+          }
+        },
+        {
+          "name": "Get All Transactions",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/transactions"
+          }
+        },
+        {
+          "name": "Get Transaction by ID",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/transactions/{{transactionId}}"
+          }
+        },
+        {
+          "name": "Get Account Transactions",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/transactions/account/{{accountId}}?limit=10&offset=0"
+          }
+        },
+        {
+          "name": "Get Transaction Stats",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/transactions/account/{{accountId}}/stats"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transfers",
+      "item": [
+        {
+          "name": "Create Transfer",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "http://localhost:5000/api/transfers",
+            "body": {
+              "raw": "{\"fromAccountId\":\"{{accountId}}\",\"toAccountId\":\"{{toAccountId}}\",\"amount\":\"100.00\",\"description\":\"Test transfer\"}"
+            }
+          }
+        },
+        {
+          "name": "Get All Transfers",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/transfers"
+          }
+        },
+        {
+          "name": "Get Transfer by ID",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/transfers/{{transferId}}"
+          }
+        },
+        {
+          "name": "Get Account Transfers",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/transfers/account/{{accountId}}"
+          }
+        },
+        {
+          "name": "Delete Transfer",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:5000/api/transfers/{{transferId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Database Statistics",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/admin/stats"
+          }
+        },
+        {
+          "name": "Database Health",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/admin/health/db"
+          }
+        },
+        {
+          "name": "System Info",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/admin/info"
+          }
+        },
+        {
+          "name": "Seed Test Data",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:5000/api/admin/seed-data"
+          }
+        }
+      ]
+    }
+  ]
+}
