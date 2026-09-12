@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1221,7 +1222,7 @@
      * GET    /api/accounts/:id
      * GET    /api/accounts/user/:userId
      * GET    /api/accounts/:id/balance
-     
+     *
      * Transactions:
      * GET    /api/transactions
      * POST   /api/transactions
@@ -1241,3 +1242,4 @@
 
 </body>
 </html>
+```
