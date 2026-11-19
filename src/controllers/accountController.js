@@ -3,6 +3,13 @@ import * as accountModel from '../models/accountModel.js';
 export const createAccountController = async (req, res) => {
   try {
     const { userId, accountNumber, accountType, currency } = req.body;
+
+    if (req.user.role !== 'ADMIN' && userId !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only create accounts for your own user'
+      });
+    }
     
     const account = await accountModel.createAccount({
       userId,
@@ -35,6 +42,13 @@ export const getAccountController = async (req, res) => {
         message: 'Account not found'
       });
     }
+
+    if (req.user.role !== 'ADMIN' && account.user_id !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden'
+      });
+    }
     
     res.status(200).json({
       success: true,
@@ -51,6 +65,13 @@ export const getAccountController = async (req, res) => {
 export const getAccountsByUserController = async (req, res) => {
   try {
     const { userId } = req.params;
+    if (req.user.role !== 'ADMIN' && userId !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden'
+      });
+    }
+
     const accounts = await accountModel.getAccountsByUserId(userId);
     
     res.status(200).json({
@@ -87,6 +108,20 @@ export const updateAccountController = async (req, res) => {
   try {
     const { id } = req.params;
     const { accountType, status } = req.body;
+
+    const existingAccount = await accountModel.getAccountById(id);
+    if (!existingAccount) {
+      return res.status(404).json({
+        success: false,
+        message: 'Account not found'
+      });
+    }
+    if (req.user.role !== 'ADMIN' && existingAccount.user_id !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden'
+      });
+    }
     
     const account = await accountModel.updateAccount(id, {
       accountType,
@@ -116,6 +151,21 @@ export const updateAccountController = async (req, res) => {
 export const deleteAccountController = async (req, res) => {
   try {
     const { id } = req.params;
+
+    const existingAccount = await accountModel.getAccountById(id);
+    if (!existingAccount) {
+      return res.status(404).json({
+        success: false,
+        message: 'Account not found'
+      });
+    }
+    if (req.user.role !== 'ADMIN' && existingAccount.user_id !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden'
+      });
+    }
+
     const account = await accountModel.deleteAccount(id);
     
     if (!account) {
@@ -141,6 +191,20 @@ export const deleteAccountController = async (req, res) => {
 export const getBalanceController = async (req, res) => {
   try {
     const { id } = req.params;
+    const account = await accountModel.getAccountById(id);
+    if (!account) {
+      return res.status(404).json({
+        success: false,
+        message: 'Account not found'
+      });
+    }
+    if (req.user.role !== 'ADMIN' && account.user_id !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden'
+      });
+    }
+
     const balance = await accountModel.getBalance(id);
     
     res.status(200).json({

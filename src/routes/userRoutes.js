@@ -1,4 +1,5 @@
 import express from 'express';
+import { authenticate, authorizeRoles, requireSelfOrAdmin } from '../middleware/auth.js';
 import {
   createUserController,
   getUserController,
@@ -9,10 +10,10 @@ import {
 
 const router = express.Router();
 
-router.post('/', createUserController);
-router.get('/', getAllUsersController);
-router.get('/:id', getUserController);
-router.put('/:id', updateUserController);
-router.delete('/:id', deleteUserController);
+router.post('/', authenticate, authorizeRoles('ADMIN'), createUserController);
+router.get('/', authenticate, authorizeRoles('ADMIN'), getAllUsersController);
+router.get('/:id', authenticate, requireSelfOrAdmin, getUserController);
+router.put('/:id', authenticate, requireSelfOrAdmin, updateUserController);
+router.delete('/:id', authenticate, requireSelfOrAdmin, deleteUserController);
 
 export default router;

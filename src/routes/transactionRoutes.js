@@ -1,4 +1,5 @@
 import express from 'express';
+import { authenticate, authorizeRoles } from '../middleware/auth.js';
 import {
   createTransactionController,
   getTransactionController,
@@ -9,10 +10,10 @@ import {
 
 const router = express.Router();
 
-router.post('/', createTransactionController);
-router.get('/', getAllTransactionsController);
-router.get('/:id', getTransactionController);
-router.get('/account/:accountId', getTransactionsByAccountController);
-router.get('/account/:accountId/stats', getTransactionStatsController);
+router.post('/', authenticate, createTransactionController);
+router.get('/', authenticate, authorizeRoles('ADMIN'), getAllTransactionsController);
+router.get('/:id', authenticate, getTransactionController);
+router.get('/account/:accountId', authenticate, getTransactionsByAccountController);
+router.get('/account/:accountId/stats', authenticate, getTransactionStatsController);
 
 export default router;

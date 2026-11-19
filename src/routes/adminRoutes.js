@@ -1,4 +1,5 @@
 import express from 'express';
+import { authenticate, authorizeRoles } from '../middleware/auth.js';
 import { getDatabaseStats, checkConnection, dropAllTables, resetDatabase, seedTestData } from '../config/database-utils.js';
 
 const router = express.Router();
@@ -9,7 +10,7 @@ const router = express.Router();
  */
 
 // Get system health and database statistics
-router.get('/stats', async (req, res) => {
+router.get('/stats', authenticate, authorizeRoles('ADMIN'), async (req, res) => {
   try {
     const isConnected = await checkConnection();
     const stats = await getDatabaseStats();
@@ -31,7 +32,7 @@ router.get('/stats', async (req, res) => {
 });
 
 // Check database connection
-router.get('/health/db', async (req, res) => {
+router.get('/health/db', authenticate, authorizeRoles('ADMIN'), async (req, res) => {
   try {
     const isConnected = await checkConnection();
     
@@ -49,7 +50,7 @@ router.get('/health/db', async (req, res) => {
 });
 
 // Seed test data (development only)
-router.post('/seed-data', async (req, res) => {
+router.post('/seed-data', authenticate, authorizeRoles('ADMIN'), async (req, res) => {
   if (process.env.NODE_ENV === 'production') {
     return res.status(403).json({
       success: false,
@@ -73,7 +74,7 @@ router.post('/seed-data', async (req, res) => {
 });
 
 // Reset database (development only - DANGEROUS)
-router.post('/reset-database', async (req, res) => {
+router.post('/reset-database', authenticate, authorizeRoles('ADMIN'), async (req, res) => {
   if (process.env.NODE_ENV === 'production') {
     return res.status(403).json({
       success: false,
@@ -108,7 +109,7 @@ router.post('/reset-database', async (req, res) => {
 /**
  * System information
  */
-router.get('/info', (req, res) => {
+router.get('/info', authenticate, authorizeRoles('ADMIN'), (req, res) => {
   res.status(200).json({
     success: true,
     system: {

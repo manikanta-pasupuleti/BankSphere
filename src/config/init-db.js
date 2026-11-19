@@ -9,6 +9,8 @@ export const initializeDatabase = async () => {
         first_name VARCHAR(100) NOT NULL,
         last_name VARCHAR(100) NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
+        password_hash TEXT,
+        role VARCHAR(20) DEFAULT 'CUSTOMER',
         phone VARCHAR(15),
         address VARCHAR(255),
         city VARCHAR(100),
@@ -18,6 +20,12 @@ export const initializeDatabase = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
+    `);
+
+    await pool.query(`
+      ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS password_hash TEXT,
+      ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'CUSTOMER'
     `);
 
     // Create Accounts table

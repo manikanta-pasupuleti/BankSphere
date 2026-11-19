@@ -11,6 +11,7 @@ import accountRoutes from './routes/accountRoutes.js';
 import transactionRoutes from './routes/transactionRoutes.js';
 import transferRoutes from './routes/transferRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/transfers', transferRoutes);
+app.use('/api/auth', authRoutes);
 
 // Admin Routes (development/monitoring)
 app.use('/api/admin', adminRoutes);
