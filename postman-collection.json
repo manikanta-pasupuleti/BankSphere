@@ -5,12 +5,18 @@
     "version": "1.0.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://banksphere-b1th.onrender.com"
+    }
+  ],
   "item": [
     {
       "name": "Health Check",
       "request": {
         "method": "GET",
-        "url": "http://localhost:5000/health"
+        "url": "{{baseUrl}}/health"
       }
     },
     {
@@ -21,7 +27,7 @@
           "request": {
             "method": "POST",
             "header": [{"key": "Content-Type", "value": "application/json"}],
-            "url": "http://localhost:5000/api/users",
+            "url": "{{baseUrl}}/api/users",
             "body": {
               "raw": "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"email\":\"john@example.com\",\"phone\":\"+1234567890\",\"address\":\"123 Main St\",\"city\":\"New York\",\"state\":\"NY\",\"postalCode\":\"10001\",\"country\":\"USA\"}"
             }
@@ -31,14 +37,14 @@
           "name": "Get All Users",
           "request": {
             "method": "GET",
-            "url": "http://localhost:5000/api/users"
+            "url": "{{baseUrl}}/api/users"
           }
         },
         {
           "name": "Get User by ID",
           "request": {
             "method": "GET",
-            "url": "http://localhost:5000/api/users/{{userId}}"
+            "url": "{{baseUrl}}/api/users/{{userId}}"
           }
         },
         {
@@ -46,7 +52,7 @@
           "request": {
             "method": "PUT",
             "header": [{"key": "Content-Type", "value": "application/json"}],
-            "url": "http://localhost:5000/api/users/{{userId}}",
+            "url": "{{baseUrl}}/api/users/{{userId}}",
             "body": {
               "raw": "{\"firstName\":\"Jane\",\"lastName\":\"Doe\",\"email\":\"jane@example.com\"}"
             }
@@ -56,7 +62,7 @@
           "name": "Delete User",
           "request": {
             "method": "DELETE",
-            "url": "http://localhost:5000/api/users/{{userId}}"
+            "url": "{{baseUrl}}/api/users/{{userId}}"
           }
         }
       ]
@@ -69,7 +75,7 @@
           "request": {
             "method": "POST",
             "header": [{"key": "Content-Type", "value": "application/json"}],
-            "url": "http://localhost:5000/api/accounts",
+            "url": "{{baseUrl}}/api/accounts",
             "body": {
               "raw": "{\"userId\":\"{{userId}}\",\"accountNumber\":\"ACC1234567890\",\"accountType\":\"SAVINGS\",\"currency\":\"USD\"}"
             }
@@ -79,28 +85,28 @@
           "name": "Get All Accounts",
           "request": {
             "method": "GET",
-            "url": "http://localhost:5000/api/accounts"
+            "url": "{{baseUrl}}/api/accounts"
           }
         },
         {
           "name": "Get Account by ID",
           "request": {
             "method": "GET",
-            "url": "http://localhost:5000/api/accounts/{{accountId}}"
+            "url": "{{baseUrl}}/api/accounts/{{accountId}}"
           }
         },
         {
           "name": "Get Accounts by User",
           "request": {
             "method": "GET",
-            "url": "http://localhost:5000/api/accounts/user/{{userId}}"
+            "url": "{{baseUrl}}/api/accounts/user/{{userId}}"
           }
         },
         {
           "name": "Get Account Balance",
           "request": {
             "method": "GET",
-            "url": "http://localhost:5000/api/accounts/{{accountId}}/balance"
+            "url": "{{baseUrl}}/api/accounts/{{accountId}}/balance"
           }
         },
         {
@@ -108,7 +114,7 @@
           "request": {
             "method": "PUT",
             "header": [{"key": "Content-Type", "value": "application/json"}],
-            "url": "http://localhost:5000/api/accounts/{{accountId}}",
+            "url": "{{baseUrl}}/api/accounts/{{accountId}}",
             "body": {
               "raw": "{\"accountType\":\"CHECKING\",\"status\":\"ACTIVE\"}"
             }
@@ -118,7 +124,7 @@
           "name": "Delete Account",
           "request": {
             "method": "DELETE",
-            "url": "http://localhost:5000/api/accounts/{{accountId}}"
+            "url": "{{baseUrl}}/api/accounts/{{accountId}}"
           }
         }
       ]
@@ -131,7 +137,7 @@
           "request": {
             "method": "POST",
             "header": [{"key": "Content-Type", "value": "application/json"}],
-            "url": "http://localhost:5000/api/transactions",
+            "url": "{{baseUrl}}/api/transactions",
             "body": {
               "raw": "{\"accountId\":\"{{accountId}}\",\"transactionType\":\"DEPOSIT\",\"amount\":\"1000.00\",\"description\":\"Test deposit\"}"
             }
@@ -142,7 +148,7 @@
           "request": {
             "method": "POST",
             "header": [{"key": "Content-Type", "value": "application/json"}],
-            "url": "http://localhost:5000/api/transactions",
+            "url": "{{baseUrl}}/api/transactions",
             "body": {
               "raw": "{\"accountId\":\"{{accountId}}\",\"transactionType\":\"WITHDRAWAL\",\"amount\":\"100.00\",\"description\":\"Test withdrawal\"}"
             }
@@ -152,28 +158,28 @@
           "name": "Get All Transactions",
           "request": {
             "method": "GET",
-            "url": "http://localhost:5000/api/transactions"
+            "url": "{{baseUrl}}/api/transactions"
           }
         },
         {
           "name": "Get Transaction by ID",
           "request": {
             "method": "GET",
-            "url": "http://localhost:5000/api/transactions/{{transactionId}}"
+            "url": "{{baseUrl}}/api/transactions/{{transactionId}}"
           }
         },
         {
           "name": "Get Account Transactions",
           "request": {
             "method": "GET",
-            "url": "http://localhost:5000/api/transactions/account/{{accountId}}?limit=10&offset=0"
+            "url": "{{baseUrl}}/api/transactions/account/{{accountId}}?limit=10&offset=0"
           }
         },
         {
           "name": "Get Transaction Stats",
           "request": {
             "method": "GET",
-            "url": "http://localhost:5000/api/transactions/account/{{accountId}}/stats"
+            "url": "{{baseUrl}}/api/transactions/account/{{accountId}}/stats"
           }
         }
       ]
@@ -186,7 +192,7 @@
           "request": {
             "method": "POST",
             "header": [{"key": "Content-Type", "value": "application/json"}],
-            "url": "http://localhost:5000/api/transfers",
+            "url": "{{baseUrl}}/api/transfers",
             "body": {
               "raw": "{\"fromAccountId\":\"{{accountId}}\",\"toAccountId\":\"{{toAccountId}}\",\"amount\":\"100.00\",\"description\":\"Test transfer\"}"
             }
@@ -196,28 +202,28 @@
           "name": "Get All Transfers",
           "request": {
             "method": "GET",
-            "url": "http://localhost:5000/api/transfers"
+            "url": "{{baseUrl}}/api/transfers"
           }
         },
         {
           "name": "Get Transfer by ID",
           "request": {
             "method": "GET",
-            "url": "http://localhost:5000/api/transfers/{{transferId}}"
+            "url": "{{baseUrl}}/api/transfers/{{transferId}}"
           }
         },
         {
           "name": "Get Account Transfers",
           "request": {
             "method": "GET",
-            "url": "http://localhost:5000/api/transfers/account/{{accountId}}"
+            "url": "{{baseUrl}}/api/transfers/account/{{accountId}}"
           }
         },
         {
           "name": "Delete Transfer",
           "request": {
             "method": "DELETE",
-            "url": "http://localhost:5000/api/transfers/{{transferId}}"
+            "url": "{{baseUrl}}/api/transfers/{{transferId}}"
           }
         }
       ]
@@ -229,28 +235,28 @@
           "name": "Database Statistics",
           "request": {
             "method": "GET",
-            "url": "http://localhost:5000/api/admin/stats"
+            "url": "{{baseUrl}}/api/admin/stats"
           }
         },
         {
           "name": "Database Health",
           "request": {
             "method": "GET",
-            "url": "http://localhost:5000/api/admin/health/db"
+            "url": "{{baseUrl}}/api/admin/health/db"
           }
         },
         {
           "name": "System Info",
           "request": {
             "method": "GET",
-            "url": "http://localhost:5000/api/admin/info"
+            "url": "{{baseUrl}}/api/admin/info"
           }
         },
         {
           "name": "Seed Test Data",
           "request": {
             "method": "POST",
-            "url": "http://localhost:5000/api/admin/seed-data"
+            "url": "{{baseUrl}}/api/admin/seed-data"
           }
         }
       ]
