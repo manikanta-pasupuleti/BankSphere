@@ -1,4 +1,5 @@
 import * as transferModel from '../models/transferModel.js';
+import * as accountModel from '../models/accountModel.js';
 import pool from '../config/database.js';
 
 export const createTransferController = async (req, res) => {
@@ -7,17 +8,36 @@ export const createTransferController = async (req, res) => {
   try {
     await client.query('BEGIN');
     const { fromAccountId, toAccountId, amount, description } = req.body;
-    
-    // Validate amount
-    if (amount <= 0) {
+
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+      await client.query('ROLLBACK');
       return res.status(400).json({
         success: false,
         message: 'Amount must be greater than 0'
       });
     }
-    
-    // Get from account
-    const fromAccount = await client.query('SELECT * FROM accounts WHERE id = $1', [fromAccountId]);
+
+    if (!fromAccountId || !toAccountId) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({
+        success: false,
+        message: 'fromAccountId and toAccountId are required'
+      });
+    }
+
+    if (fromAccountId === toAccountId) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({
+        success: false,
+        message: 'Source and destination accounts must be different'
+      });
+    }
+
+    const fromAccount = await client.query(
+      'SELECT * FROM accounts WHERE id = $1 FOR UPDATE',
+      [fromAccountId]
+    );
     if (fromAccount.rows.length === 0) {
       await client.query('ROLLBACK');
       return res.status(404).json({
@@ -25,9 +45,19 @@ export const createTransferController = async (req, res) => {
         message: 'Source account not found'
       });
     }
-    
-    // Get to account
-    const toAccount = await client.query('SELECT * FROM accounts WHERE id = $1', [toAccountId]);
+
+    if (req.user.role !== 'ADMIN' && fromAccount.rows[0].user_id !== req.user.userId) {
+      await client.query('ROLLBACK');
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden'
+      });
+    }
+
+    const toAccount = await client.query(
+      'SELECT * FROM accounts WHERE id = $1 FOR UPDATE',
+      [toAccountId]
+    );
     if (toAccount.rows.length === 0) {
       await client.query('ROLLBACK');
       return res.status(404).json({
@@ -35,9 +65,8 @@ export const createTransferController = async (req, res) => {
         message: 'Destination account not found'
       });
     }
-    
-    // Check balance
-    if (fromAccount.rows[0].balance < amount) {
+
+    if (Number(fromAccount.rows[0].balance) < numericAmount) {
       await client.query('ROLLBACK');
       return res.status(400).json({
         success: false,
@@ -47,13 +76,13 @@ export const createTransferController = async (req, res) => {
     
     // Update balances
     await client.query(
-      'UPDATE accounts SET balance = balance - $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-      [amount, fromAccountId]
+      'UPDATE accounts SET balance = ROUND(CAST(balance - $1 AS NUMERIC), 2), updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      [numericAmount, fromAccountId]
     );
     
     await client.query(
-      'UPDATE accounts SET balance = balance + $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-      [amount, toAccountId]
+      'UPDATE accounts SET balance = ROUND(CAST(balance + $1 AS NUMERIC), 2), updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      [numericAmount, toAccountId]
     );
     
     // Create transfer record
@@ -61,7 +90,7 @@ export const createTransferController = async (req, res) => {
       `INSERT INTO transfers (id, from_account_id, to_account_id, amount, description, status)
        VALUES (gen_random_uuid(), $1, $2, $3, $4, 'COMPLETED')
        RETURNING *`,
-      [fromAccountId, toAccountId, amount, description]
+      [fromAccountId, toAccountId, numericAmount, description]
     );
     
     await client.query('COMMIT');
@@ -93,6 +122,18 @@ export const getTransferController = async (req, res) => {
         message: 'Transfer not found'
       });
     }
+
+    if (req.user.role !== 'ADMIN') {
+      const source = await accountModel.getAccountById(transfer.from_account_id);
+      const destination = await accountModel.getAccountById(transfer.to_account_id);
+      const ownsTransfer = source?.user_id === req.user.userId || destination?.user_id === req.user.userId;
+      if (!ownsTransfer) {
+        return res.status(403).json({
+          success: false,
+          message: 'Forbidden'
+        });
+      }
+    }
     
     res.status(200).json({
       success: true,
@@ -109,6 +150,17 @@ export const getTransferController = async (req, res) => {
 export const getTransfersByAccountController = async (req, res) => {
   try {
     const { accountId } = req.params;
+
+    if (req.user.role !== 'ADMIN') {
+      const account = await accountModel.getAccountById(accountId);
+      if (!account || account.user_id !== req.user.userId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Forbidden'
+        });
+      }
+    }
+
     const transfers = await transferModel.getTransfersByAccountId(accountId);
     
     res.status(200).json({

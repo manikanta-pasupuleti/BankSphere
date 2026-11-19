@@ -8,17 +8,28 @@ export const createTransactionController = async (req, res) => {
   try {
     await client.query('BEGIN');
     const { accountId, transactionType, amount, description } = req.body;
-    
-    // Validate amount
-    if (amount <= 0) {
+
+    if (!['DEPOSIT', 'WITHDRAWAL'].includes(transactionType)) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({
+        success: false,
+        message: 'transactionType must be DEPOSIT or WITHDRAWAL'
+      });
+    }
+
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+      await client.query('ROLLBACK');
       return res.status(400).json({
         success: false,
         message: 'Amount must be greater than 0'
       });
     }
-    
-    // Get account balance
-    const account = await client.query('SELECT * FROM accounts WHERE id = $1', [accountId]);
+
+    const account = await client.query(
+      'SELECT * FROM accounts WHERE id = $1 FOR UPDATE',
+      [accountId]
+    );
     
     if (account.rows.length === 0) {
       await client.query('ROLLBACK');
@@ -27,23 +38,29 @@ export const createTransactionController = async (req, res) => {
         message: 'Account not found'
       });
     }
-    
-    // Check balance for withdrawal
-    if (transactionType === 'WITHDRAWAL' && account.rows[0].balance < amount) {
+
+    if (req.user.role !== 'ADMIN' && account.rows[0].user_id !== req.user.userId) {
+      await client.query('ROLLBACK');
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden'
+      });
+    }
+
+    if (transactionType === 'WITHDRAWAL' && Number(account.rows[0].balance) < numericAmount) {
       await client.query('ROLLBACK');
       return res.status(400).json({
         success: false,
         message: 'Insufficient balance'
       });
     }
-    
-    // Update balance
-    const newBalance = transactionType === 'DEPOSIT' 
-      ? account.rows[0].balance + parseFloat(amount)
-      : account.rows[0].balance - parseFloat(amount);
+
+    const newBalance = transactionType === 'DEPOSIT'
+      ? Number(account.rows[0].balance) + numericAmount
+      : Number(account.rows[0].balance) - numericAmount;
     
     await client.query(
-      'UPDATE accounts SET balance = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      'UPDATE accounts SET balance = ROUND(CAST($1 AS NUMERIC), 2), updated_at = CURRENT_TIMESTAMP WHERE id = $2',
       [newBalance, accountId]
     );
     
@@ -52,7 +69,7 @@ export const createTransactionController = async (req, res) => {
       `INSERT INTO transactions (id, account_id, transaction_type, amount, description, balance_after, status)
        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, 'COMPLETED')
        RETURNING *`,
-      [accountId, transactionType, amount, description, newBalance]
+      [accountId, transactionType, numericAmount, description, newBalance]
     );
     
     await client.query('COMMIT');
@@ -84,6 +101,16 @@ export const getTransactionController = async (req, res) => {
         message: 'Transaction not found'
       });
     }
+
+    if (req.user.role !== 'ADMIN') {
+      const account = await accountModel.getAccountById(transaction.account_id);
+      if (!account || account.user_id !== req.user.userId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Forbidden'
+        });
+      }
+    }
     
     res.status(200).json({
       success: true,
@@ -101,6 +128,16 @@ export const getTransactionsByAccountController = async (req, res) => {
   try {
     const { accountId } = req.params;
     const { limit = 50, offset = 0 } = req.query;
+
+    if (req.user.role !== 'ADMIN') {
+      const account = await accountModel.getAccountById(accountId);
+      if (!account || account.user_id !== req.user.userId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Forbidden'
+        });
+      }
+    }
     
     const transactions = await transactionModel.getTransactionsByAccountId(
       accountId,
@@ -141,6 +178,17 @@ export const getAllTransactionsController = async (req, res) => {
 export const getTransactionStatsController = async (req, res) => {
   try {
     const { accountId } = req.params;
+
+    if (req.user.role !== 'ADMIN') {
+      const account = await accountModel.getAccountById(accountId);
+      if (!account || account.user_id !== req.user.userId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Forbidden'
+        });
+      }
+    }
+
     const stats = await transactionModel.getTransactionStats(accountId);
     
     res.status(200).json({

@@ -109,6 +109,13 @@ export const updateAccountController = async (req, res) => {
     const { id } = req.params;
     const { accountType, status } = req.body;
 
+    if (status && req.user.role !== 'ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only administrators can change account status'
+      });
+    }
+
     const existingAccount = await accountModel.getAccountById(id);
     if (!existingAccount) {
       return res.status(404).json({
